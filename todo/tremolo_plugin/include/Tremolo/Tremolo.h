@@ -21,7 +21,7 @@ public:
         const auto inputSample = buffer.getSample(channelIndex, frameIndex);
 
         // TODO: modulate the sample
-        const auto outputSample = inputSample;
+        const auto outputSample = inputSample * 0.5f;
 
         // set the output sample
         buffer.setSample(channelIndex, frameIndex, outputSample);
