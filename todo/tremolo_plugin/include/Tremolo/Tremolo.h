@@ -13,19 +13,25 @@ public:
         juce::MathConstants<double>::twoPi * lfoRateHz / sampleRate;
   }
 
+  void setModulationDepth(float newDepth) noexcept {
+    modulationDepth = juce::jlimit(0.0f, 1.0f, newDepth);
+  }
+
   void process(juce::AudioBuffer<float>& buffer) noexcept {
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       const auto lfoValue = 0.5 * (1.0 + std::sin(phase));
 
-      const auto modulationValue = static_cast<float>(lfoValue);
+      const auto modulationValue =
+          (1.0f - modulationDepth) +
+          modulationDepth * static_cast<float>(lfoValue);
       // for each channel sample in the frame
       for (const auto channelIndex :
            std::views::iota(0, buffer.getNumChannels())) {
         // get the input sample
         const auto inputSample = buffer.getSample(channelIndex, frameIndex);
 
-        // TODO: modulate the sample
+        // modulate the sample
         const auto outputSample = inputSample * modulationValue;
 
         // set the output sample
@@ -43,5 +49,6 @@ public:
 private:
   double phase = 0.0;
   double phaseIncrement = 0.0;
+  float modulationDepth = 0.5f;
 };
 }  // namespace tremolo
