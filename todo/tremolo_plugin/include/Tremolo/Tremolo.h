@@ -3,14 +3,16 @@
 namespace tremolo {
 class Tremolo {
 public:
+  Tremolo() { lfo.setFrequency(2.0f, true); }
   void prepare(double sampleRate, int expectedMaxFramesPerBlock) {
-    juce::ignoreUnused(expectedMaxFramesPerBlock);
+    const juce::dsp::ProcessSpec processSpec{
+        .sampleRate = sampleRate,
+        .maximumBlockSize =
+            static_cast<juce::uint32>(expectedMaxFramesPerBlock),
+        .numChannels = 1u,
+    };
 
-    constexpr double lfoRateHz = 2.0;
-
-    phase = 0.0;
-    phaseIncrement =
-        juce::MathConstants<double>::twoPi * lfoRateHz / sampleRate;
+    lfo.prepare(processSpec);
   }
 
   void setModulationDepth(float newDepth) noexcept {
@@ -20,11 +22,11 @@ public:
   void process(juce::AudioBuffer<float>& buffer) noexcept {
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
-      const auto lfoValue = 0.5 * (1.0 + std::sin(phase));
+      const auto rawLfoValue = lfo.processSample(0.0f);
+      const auto lfoValue = 0.5f * (1.0f + rawLfoValue);
 
       const auto modulationValue =
-          (1.0f - modulationDepth) +
-          modulationDepth * static_cast<float>(lfoValue);
+          (1.0f - modulationDepth) + modulationDepth * lfoValue;
       // for each channel sample in the frame
       for (const auto channelIndex :
            std::views::iota(0, buffer.getNumChannels())) {
@@ -37,18 +39,14 @@ public:
         // set the output sample
         buffer.setSample(channelIndex, frameIndex, outputSample);
       }
-      phase += phaseIncrement;
-      if (phase >= juce::MathConstants<double>::twoPi) {
-        phase -= juce::MathConstants<double>::twoPi;
-      }
     }
   }
 
-  void reset() noexcept { phase = 0.0; }
+  void reset() noexcept { lfo.reset(); }
 
 private:
-  double phase = 0.0;
-  double phaseIncrement = 0.0;
   float modulationDepth = 0.5f;
+  juce::dsp::Oscillator<float> lfo{
+      [](float phaseValue) { return std::sin(phaseValue); }};
 };
 }  // namespace tremolo
