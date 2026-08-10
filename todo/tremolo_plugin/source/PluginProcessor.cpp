@@ -54,7 +54,7 @@ void PluginProcessor::prepareToPlay(double sampleRate,
                                     int expectedMaxFramesPerBlock) {
   // Use this method as the place to do any pre-playback
   // initialization that you need, e.g., allocate memory.
-  tremolo.setModulationDepth(0.5f);
+  tremolo.setModulationDepth(0.4f);
   tremolo.prepare(sampleRate, expectedMaxFramesPerBlock);
 }
 

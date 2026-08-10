@@ -23,10 +23,8 @@ public:
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       const auto rawLfoValue = lfo.processSample(0.0f);
-      const auto lfoValue = 0.5f * (1.0f + rawLfoValue);
 
-      const auto modulationValue =
-          (1.0f - modulationDepth) + modulationDepth * lfoValue;
+      const auto modulationValue = 1.0f + modulationDepth * rawLfoValue;
       // for each channel sample in the frame
       for (const auto channelIndex :
            std::views::iota(0, buffer.getNumChannels())) {
@@ -45,7 +43,7 @@ public:
   void reset() noexcept { lfo.reset(); }
 
 private:
-  float modulationDepth = 0.5f;
+  float modulationDepth = 0.4f;
   juce::dsp::Oscillator<float> lfo{
       [](float phaseValue) { return std::sin(phaseValue); }};
 };
