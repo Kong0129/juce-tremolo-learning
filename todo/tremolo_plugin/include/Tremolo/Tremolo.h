@@ -44,7 +44,12 @@ public:
 
 private:
   float modulationDepth = 0.4f;
-  juce::dsp::Oscillator<float> lfo{
-      [](float phaseValue) { return std::sin(phaseValue); }};
+  static float triangle(float phaseValue) noexcept {
+    const auto ft = phaseValue / juce::MathConstants<float>::twoPi;
+
+    return 4.0f * std::abs(ft - std::floor(ft + 0.5f)) - 1.0f;
+  }
+  juce::dsp::Oscillator<float> lfo{triangle};
 };
+
 }  // namespace tremolo
