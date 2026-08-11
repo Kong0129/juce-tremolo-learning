@@ -27,11 +27,25 @@ public:
     }
   }
 
+  void setLfoWaveform(LfoWaveform newWaveform) noexcept {
+    const auto isValidWaveform = newWaveform == LfoWaveform::sine ||
+                                 newWaveform == LfoWaveform::triangle;
+
+    jassert(isValidWaveform);
+
+    if (!isValidWaveform) {
+      return;
+    }
+
+    lfoToSet = newWaveform;
+  }
+
   void setModulationDepth(float newDepth) noexcept {
     modulationDepth = juce::jlimit(0.0f, 1.0f, newDepth);
   }
 
   void process(juce::AudioBuffer<float>& buffer) noexcept {
+    updateLfoWaveform();
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       const auto lfoIndex = juce::toUnderlyingType(currentLfo);
@@ -75,6 +89,12 @@ private:
   };
 
   LfoWaveform currentLfo = LfoWaveform::sine;
+  LfoWaveform lfoToSet = LfoWaveform::sine;
+  void updateLfoWaveform() noexcept {
+    if (currentLfo != lfoToSet) {
+      currentLfo = lfoToSet;
+    }
+  }
 };
 
 }  // namespace tremolo
