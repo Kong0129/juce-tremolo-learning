@@ -12,7 +12,19 @@ juce::AudioParameterChoice& createWaveformParameter(
 
   return parameterReference;
 }
+juce::AudioParameterFloat& createRateParameter(
+    juce::AudioProcessor& processor) {
+  auto parameter = std::make_unique<juce::AudioParameterFloat>(
+      juce::ParameterID{"modulation.rate", 1}, "Rate",
+      juce::NormalisableRange<float>{0.1f, 20.0f, 0.01f, 0.4f}, 2.0f, "Hz");
+
+  auto& parameterReference = *parameter;
+  processor.addParameter(parameter.release());
+
+  return parameterReference;
+}
 }  // namespace
 Parameters::Parameters(juce::AudioProcessor& processor)
-    : waveform(createWaveformParameter(processor)) {}
+    : waveform(createWaveformParameter(processor)),
+      rate(createRateParameter(processor)) {}
 }  // namespace tremolo

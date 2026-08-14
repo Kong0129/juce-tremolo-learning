@@ -44,6 +44,12 @@ public:
     modulationDepth = juce::jlimit(0.0f, 1.0f, newDepth);
   }
 
+  void setModulationRate(float newRate) noexcept {
+    for (auto& oscillator : lfos) {
+      oscillator.setFrequency(newRate);
+    }
+  }
+
   void process(juce::AudioBuffer<float>& buffer) noexcept {
     updateLfoWaveform();
     // for each frame

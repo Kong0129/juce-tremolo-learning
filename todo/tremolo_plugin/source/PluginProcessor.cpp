@@ -105,8 +105,9 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
   // TODO: update parameters
   const auto waveform =
       static_cast<Tremolo::LfoWaveform>(parameters.waveform.getIndex());
-
+  const auto modulationRate = parameters.rate.get();
   tremolo.setLfoWaveform(waveform);
+  tremolo.setModulationRate(modulationRate);
 
   // TODO: check for bypass
 
