@@ -23,8 +23,20 @@ juce::AudioParameterFloat& createRateParameter(
 
   return parameterReference;
 }
+juce::AudioParameterFloat& createDepthParameter(
+    juce::AudioProcessor& processor) {
+  auto parameter = std::make_unique<juce::AudioParameterFloat>(
+      juce::ParameterID{"modulation.depth", 1}, "Depth",
+      juce::NormalisableRange<float>{0.0f, 100.0f, 0.1f}, 40.0f, "%");
+
+  auto& parameterReference = *parameter;
+  processor.addParameter(parameter.release());
+
+  return parameterReference;
+}
 }  // namespace
 Parameters::Parameters(juce::AudioProcessor& processor)
     : waveform(createWaveformParameter(processor)),
-      rate(createRateParameter(processor)) {}
+      rate(createRateParameter(processor)),
+      depth(createDepthParameter(processor)) {}
 }  // namespace tremolo
