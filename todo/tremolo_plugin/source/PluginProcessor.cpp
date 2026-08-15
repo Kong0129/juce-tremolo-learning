@@ -106,14 +106,20 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
       static_cast<Tremolo::LfoWaveform>(parameters.waveform.getIndex());
   const auto modulationRate = parameters.rate.get();
   const auto modulationDepth = parameters.depth.get() / 100.0f;
+  const auto bypassed = parameters.bypassed.get();
   tremolo.setModulationDepth(modulationDepth);
   tremolo.setLfoWaveform(waveform);
   tremolo.setModulationRate(modulationRate);
 
   // TODO: check for bypass
-
   // apply tremolo
-  tremolo.process(buffer);
+  if (!bypassed) {
+    tremolo.process(buffer);
+  }
+}
+
+juce::AudioProcessorParameter* PluginProcessor::getBypassParameter() const {
+  return &parameters.bypassed;
 }
 
 bool PluginProcessor::hasEditor() const {

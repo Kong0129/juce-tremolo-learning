@@ -3,6 +3,8 @@
 namespace tremolo {
 class PluginProcessor : public juce::AudioProcessor {
 public:
+  juce::AudioProcessorParameter* getBypassParameter() const override;
+
   PluginProcessor();
 
   void prepareToPlay(double sampleRate, int expectedMaxFramesPerBlock) override;
