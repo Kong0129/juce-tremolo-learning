@@ -34,9 +34,20 @@ juce::AudioParameterFloat& createDepthParameter(
 
   return parameterReference;
 }
+juce::AudioParameterBool& createBypassParameter(
+    juce::AudioProcessor& processor) {
+  auto parameter = std::make_unique<juce::AudioParameterBool>(
+      juce::ParameterID{"bypass", 1}, "Bypass", false);
+
+  auto& parameterReference = *parameter;
+  processor.addParameter(parameter.release());
+
+  return parameterReference;
+}
 }  // namespace
 Parameters::Parameters(juce::AudioProcessor& processor)
     : waveform(createWaveformParameter(processor)),
       rate(createRateParameter(processor)),
-      depth(createDepthParameter(processor)) {}
+      depth(createDepthParameter(processor)),
+      bypassed(createBypassParameter(processor)) {}
 }  // namespace tremolo
