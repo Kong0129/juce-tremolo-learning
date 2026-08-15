@@ -54,7 +54,6 @@ void PluginProcessor::prepareToPlay(double sampleRate,
                                     int expectedMaxFramesPerBlock) {
   // Use this method as the place to do any pre-playback
   // initialization that you need, e.g., allocate memory.
-  tremolo.setModulationDepth(0.4f);
   tremolo.prepare(sampleRate, expectedMaxFramesPerBlock);
 }
 
@@ -106,6 +105,8 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
   const auto waveform =
       static_cast<Tremolo::LfoWaveform>(parameters.waveform.getIndex());
   const auto modulationRate = parameters.rate.get();
+  const auto modulationDepth = parameters.depth.get() / 100.0f;
+  tremolo.setModulationDepth(modulationDepth);
   tremolo.setLfoWaveform(waveform);
   tremolo.setModulationRate(modulationRate);
 
