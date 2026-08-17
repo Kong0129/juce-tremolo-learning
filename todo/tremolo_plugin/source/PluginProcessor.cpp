@@ -55,12 +55,19 @@ void PluginProcessor::prepareToPlay(double sampleRate,
   // Use this method as the place to do any pre-playback
   // initialization that you need, e.g., allocate memory.
   tremolo.prepare(sampleRate, expectedMaxFramesPerBlock);
+  const juce::dsp::ProcessSpec processSpec{
+      .sampleRate = sampleRate,
+      .maximumBlockSize = static_cast<juce::uint32>(expectedMaxFramesPerBlock),
+      .numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels()),
+  };
+
+  bypassTransitionSmoother.prepare(processSpec);
 }
 
 void PluginProcessor::releaseResources() {
   // When playback stops, you can use this as an opportunity to free up any
   // spare memory, etc.
-
+  bypassTransitionSmoother.reset();
   tremolo.reset();
 }
 
@@ -113,6 +120,15 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
   // TODO: check for bypass
   // apply tremolo
+  bypassTransitionSmoother.setBypass(bypassed);
+
+  if (bypassTransitionSmoother.isTransitioning()) {
+    bypassTransitionSmoother.setDryBuffer(buffer);
+    tremolo.process(buffer);
+    bypassTransitionSmoother.mixToWetBuffer(buffer);
+    return;
+  }
+
   if (!bypassed) {
     tremolo.process(buffer);
   }

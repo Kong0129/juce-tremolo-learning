@@ -38,6 +38,7 @@ public:
 private:
   Parameters parameters{*this};
   Tremolo tremolo;
+  BypassTransitionSmoother bypassTransitionSmoother;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };
