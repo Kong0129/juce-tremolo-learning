@@ -148,21 +148,51 @@ juce::AudioProcessorEditor* PluginProcessor::createEditor() {
 }
 
 void PluginProcessor::getStateInformation(juce::MemoryBlock& destData) {
-  // You should use this method to store your parameters in the memory block.
-  // You could do that either as raw data, or use the XML or ValueTree classes
-  // as intermediaries to make it easy to save and load complex data.
-  juce::ignoreUnused(destData);
+  juce::var state{new juce::DynamicObject};
 
-  // TODO: implement state serialization to JSON
+  auto* stateObject = state.getDynamicObject();
+  stateObject->setProperty("waveform", parameters.waveform.getIndex());
+  stateObject->setProperty("rate", parameters.rate.get());
+  stateObject->setProperty("depth", parameters.depth.get());
+  stateObject->setProperty("bypassed", parameters.bypassed.get());
+
+  const auto json = juce::JSON::toString(state);
+  destData.replaceAll(json.toRawUTF8(), json.getNumBytesAsUTF8());
 }
 
 void PluginProcessor::setStateInformation(const void* data, int sizeInBytes) {
-  // You should use this method to restore your parameters from this memory
-  // block, whose contents will have been created by the getStateInformation()
-  // call.
-  juce::ignoreUnused(data, sizeInBytes);
+  if (data == nullptr || sizeInBytes <= 0) {
+    return;
+  }
 
-  // TODO: implement state deserialization from JSON
+  const auto json =
+      juce::String::fromUTF8(static_cast<const char*>(data), sizeInBytes);
+  const auto state = juce::JSON::parse(json);
+  auto* stateObject = state.getDynamicObject();
+
+  if (stateObject == nullptr) {
+    return;
+  }
+
+  if (stateObject->hasProperty("waveform")) {
+    parameters.waveform =
+        static_cast<int>(stateObject->getProperty("waveform"));
+  }
+
+  if (stateObject->hasProperty("rate")) {
+    parameters.rate = static_cast<float>(stateObject->getProperty("rate"));
+  }
+
+  if (stateObject->hasProperty("depth")) {
+    parameters.depth = static_cast<float>(stateObject->getProperty("depth"));
+  }
+
+  if (stateObject->hasProperty("bypassed")) {
+    parameters.bypassed =
+        static_cast<bool>(stateObject->getProperty("bypassed"));
+  }
+
+  bypassTransitionSmoother.setBypassForced(parameters.bypassed.get());
 }
 }  // namespace tremolo
 
