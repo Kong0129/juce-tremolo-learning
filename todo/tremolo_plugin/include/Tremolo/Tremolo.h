@@ -25,6 +25,7 @@ public:
     for (auto& oscillator : lfos) {
       oscillator.prepare(processSpec);
     }
+    modulationDepth.reset(sampleRate, 0.02);
   }
 
   void setLfoWaveform(LfoWaveform newWaveform) noexcept {
@@ -41,7 +42,7 @@ public:
   }
 
   void setModulationDepth(float newDepth) noexcept {
-    modulationDepth = juce::jlimit(0.0f, 1.0f, newDepth);
+    modulationDepth.setTargetValue(juce::jlimit(0.0f, 1.0f, newDepth));
   }
 
   void setModulationRate(float newRate) noexcept {
@@ -56,7 +57,9 @@ public:
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       const auto lfoIndex = juce::toUnderlyingType(currentLfo);
       const auto rawLfoValue = lfos[lfoIndex].processSample(0.0f);
-      const auto modulationValue = 1.0f + modulationDepth * rawLfoValue;
+      const auto smoothedModulationDepth = modulationDepth.getNextValue();
+
+      const auto modulationValue = 1.0f + smoothedModulationDepth * rawLfoValue;
 
       // for each channel sample in the frame
       for (const auto channelIndex :
@@ -77,10 +80,11 @@ public:
     for (auto& oscillator : lfos) {
       oscillator.reset();
     }
+    modulationDepth.setCurrentAndTargetValue(modulationDepth.getTargetValue());
   }
 
 private:
-  float modulationDepth = 0.4f;
+  juce::LinearSmoothedValue<float> modulationDepth{0.4f};
 
   static float triangle(float phaseValue) noexcept {
     const auto ft = phaseValue / juce::MathConstants<float>::twoPi;
