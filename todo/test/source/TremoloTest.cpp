@@ -88,4 +88,24 @@ TEST(Tremolo, LfoWaveformTransitionIsSmooth) {
                  static_cast<size_t>(outputBuffer.getNumSamples())},
       wolfsound::Frequency{sampleRate});
 }
+
+TEST(Tremolo, ZeroDepthLeavesStereoFrameUnchanged) {
+  Tremolo tremolo;
+  tremolo.prepare(48000.0, 1);
+  tremolo.setModulationDepth(0.0f);
+  tremolo.reset();
+
+  juce::AudioBuffer<float> buffer;
+  buffer.setSize(2, 1);
+  buffer.setSample(0, 0, 0.25f);
+  buffer.setSample(1, 0, -0.5f);
+
+  tremolo.process(buffer);
+
+  const auto actualOutput0 = buffer.getSample(0, 0);
+  const auto actualOutput1 = buffer.getSample(1, 0);
+
+  EXPECT_NEAR(actualOutput0, 0.25f, 1.0e-6f);
+  EXPECT_NEAR(actualOutput1, -0.5f, 1.0e-6f);
+}
 }  // namespace tremolo
