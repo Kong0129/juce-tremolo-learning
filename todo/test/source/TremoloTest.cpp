@@ -4,6 +4,7 @@
 
 #include <wolfsound/file/wolfsound_WavFileWriter.hpp>
 #include <wolfsound/dsp/wolfsound_testSignals.hpp>
+#include <cmath>
 
 namespace tremolo {
 namespace {
@@ -133,4 +134,26 @@ TEST(Tremolo, DepthReachesZeroAfterSmoothingTime) {
   const auto actualOutput = verificationBuffer.getSample(0, 0);
   EXPECT_NEAR(actualOutput, 0.25f, 1.0e-6f);
 }
+
+TEST(Tremolo, DepthDoesNotReachZeroImmediately) {
+  Tremolo tremolo;
+  constexpr auto inputSample = 0.25f;
+  constexpr auto tolerance = 1.0e-6f;
+
+  tremolo.prepare(1000.0, 1);
+  tremolo.setLfoWaveform(Tremolo::LfoWaveform::triangle);
+  tremolo.setModulationDepth(0.0f);
+
+  juce::AudioBuffer<float> buffer;
+  buffer.setSize(1, 1);
+  buffer.setSample(0, 0, inputSample);
+
+  tremolo.process(buffer);
+
+  const auto actualOutput = buffer.getSample(0, 0);
+  const auto difference = std::abs(actualOutput - inputSample);
+
+  EXPECT_GT(difference, tolerance);
+}
+
 }  // namespace tremolo
