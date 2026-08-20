@@ -108,4 +108,29 @@ TEST(Tremolo, ZeroDepthLeavesStereoFrameUnchanged) {
   EXPECT_NEAR(actualOutput0, 0.25f, 1.0e-6f);
   EXPECT_NEAR(actualOutput1, -0.5f, 1.0e-6f);
 }
+
+TEST(Tremolo, DepthReachesZeroAfterSmoothingTime) {
+  Tremolo tremolo;
+  constexpr auto sampleRate = 1000.0;
+  constexpr auto smoothingSampleCount = 20;
+
+  tremolo.prepare(sampleRate, smoothingSampleCount);
+  tremolo.setLfoWaveform(Tremolo::LfoWaveform::triangle);
+  tremolo.setModulationDepth(0.0f);
+
+  juce::AudioBuffer<float> warmupBuffer;
+  warmupBuffer.setSize(1, smoothingSampleCount);
+  warmupBuffer.clear();
+
+  tremolo.process(warmupBuffer);
+
+  juce::AudioBuffer<float> verificationBuffer;
+  verificationBuffer.setSize(1, 1);
+  verificationBuffer.setSample(0, 0, 0.25f);
+
+  tremolo.process(verificationBuffer);
+
+  const auto actualOutput = verificationBuffer.getSample(0, 0);
+  EXPECT_NEAR(actualOutput, 0.25f, 1.0e-6f);
+}
 }  // namespace tremolo
