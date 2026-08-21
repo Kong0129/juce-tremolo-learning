@@ -7,6 +7,8 @@ public:
 
   juce::AudioProcessorParameter* getBypassParameter() const override;
 
+  juce::AudioParameterFloat& getRateParameter() noexcept;
+
   PluginProcessor();
 
   void prepareToPlay(double sampleRate, int expectedMaxFramesPerBlock) override;
