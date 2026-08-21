@@ -146,6 +146,10 @@ juce::AudioParameterFloat& PluginProcessor::getRateParameter() noexcept {
   return parameters.rate;
 }
 
+juce::AudioParameterFloat& PluginProcessor::getDepthParameter() noexcept {
+  return parameters.depth;
+}
+
 bool PluginProcessor::hasEditor() const {
   return true;
 }
