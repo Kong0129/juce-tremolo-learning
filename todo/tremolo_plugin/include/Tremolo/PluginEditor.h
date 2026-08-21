@@ -12,6 +12,8 @@ private:
   juce::ImageComponent logo;
   juce::ComboBox waveformSelector;
   juce::ComboBoxParameterAttachment waveformAttachment;
+  juce::Slider rateSlider;
+  juce::SliderParameterAttachment rateAttachment;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };
 }  // namespace tremolo

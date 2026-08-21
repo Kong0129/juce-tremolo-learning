@@ -142,6 +142,10 @@ juce::AudioParameterChoice& PluginProcessor::getWaveformParameter() noexcept {
   return parameters.waveform;
 }
 
+juce::AudioParameterFloat& PluginProcessor::getRateParameter() noexcept {
+  return parameters.rate;
+}
+
 bool PluginProcessor::hasEditor() const {
   return true;
 }
