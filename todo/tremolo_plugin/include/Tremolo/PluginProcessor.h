@@ -3,6 +3,8 @@
 namespace tremolo {
 class PluginProcessor : public juce::AudioProcessor {
 public:
+  juce::AudioParameterChoice& getWaveformParameter() noexcept;
+
   juce::AudioProcessorParameter* getBypassParameter() const override;
 
   PluginProcessor();

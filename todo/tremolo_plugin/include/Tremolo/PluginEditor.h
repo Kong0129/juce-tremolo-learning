@@ -10,7 +10,8 @@ public:
 private:
   juce::ImageComponent background;
   juce::ImageComponent logo;
-
+  juce::ComboBox waveformSelector;
+  juce::ComboBoxParameterAttachment waveformAttachment;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };
 }  // namespace tremolo
