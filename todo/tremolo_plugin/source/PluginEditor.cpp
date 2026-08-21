@@ -2,7 +2,8 @@ namespace tremolo {
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p),
       waveformAttachment(p.getWaveformParameter(), waveformSelector, nullptr),
-      rateAttachment(p.getRateParameter(), rateSlider, nullptr) {
+      rateAttachment(p.getRateParameter(), rateSlider, nullptr),
+      depthAttachment(p.getDepthParameter(), depthSlider, nullptr) {
   background.setImage(juce::ImageCache::getFromMemory(
       assets::Background_png, assets::Background_pngSize));
 
@@ -18,7 +19,11 @@ PluginEditor::PluginEditor(PluginProcessor& p)
   rateSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
   rateSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
   rateSlider.setTextValueSuffix(" Hz");
+  depthSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+  depthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 80, 20);
+  depthSlider.setTextValueSuffix(" %");
   addAndMakeVisible(rateSlider);
+  addAndMakeVisible(depthSlider);
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
   setSize(540, 270);
@@ -34,5 +39,7 @@ void PluginEditor::resized() {
   waveformSelector.setBounds(16, 64, 160, 32);
 
   rateSlider.setBounds(200, 48, 100, 100);
+
+  depthSlider.setBounds(320, 48, 100, 100);
 }
 }  // namespace tremolo
