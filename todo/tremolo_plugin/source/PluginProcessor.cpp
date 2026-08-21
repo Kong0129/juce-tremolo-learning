@@ -138,6 +138,10 @@ juce::AudioProcessorParameter* PluginProcessor::getBypassParameter() const {
   return &parameters.bypassed;
 }
 
+juce::AudioParameterChoice& PluginProcessor::getWaveformParameter() noexcept {
+  return parameters.waveform;
+}
+
 bool PluginProcessor::hasEditor() const {
   return true;
 }
