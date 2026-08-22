@@ -3,7 +3,8 @@ PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p),
       waveformAttachment(p.getWaveformParameter(), waveformSelector, nullptr),
       rateAttachment(p.getRateParameter(), rateSlider, nullptr),
-      depthAttachment(p.getDepthParameter(), depthSlider, nullptr) {
+      depthAttachment(p.getDepthParameter(), depthSlider, nullptr),
+      bypassButtonAttachment(p.getBypassedParameter(), bypassButton, nullptr) {
   background.setImage(juce::ImageCache::getFromMemory(
       assets::Background_png, assets::Background_pngSize));
 
@@ -24,6 +25,8 @@ PluginEditor::PluginEditor(PluginProcessor& p)
   depthSlider.setTextValueSuffix(" %");
   addAndMakeVisible(rateSlider);
   addAndMakeVisible(depthSlider);
+  bypassButton.setButtonText("Bypass");
+  addAndMakeVisible(bypassButton);
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
   setSize(540, 270);
@@ -41,5 +44,7 @@ void PluginEditor::resized() {
   rateSlider.setBounds(200, 48, 100, 100);
 
   depthSlider.setBounds(320, 48, 100, 100);
+
+  bypassButton.setBounds(440, 64, 80, 32);
 }
 }  // namespace tremolo

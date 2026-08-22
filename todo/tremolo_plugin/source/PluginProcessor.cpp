@@ -150,6 +150,10 @@ juce::AudioParameterFloat& PluginProcessor::getDepthParameter() noexcept {
   return parameters.depth;
 }
 
+juce::AudioParameterBool& PluginProcessor::getBypassedParameter() noexcept {
+  return parameters.bypassed;
+}
+
 bool PluginProcessor::hasEditor() const {
   return true;
 }
