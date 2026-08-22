@@ -1,5 +1,10 @@
 namespace tremolo {
 
+void LfoIndicator::setValue(float newValue) {
+  value = juce::jlimit(-1.0f, 1.0f, newValue);
+  repaint();
+}
+
 void LfoIndicator::paint(juce::Graphics& graphics) {
   const auto bounds = getLocalBounds().toFloat().reduced(4.0f);
 
@@ -7,11 +12,15 @@ void LfoIndicator::paint(juce::Graphics& graphics) {
   graphics.fillEllipse(bounds);
 
   constexpr auto indicatorDiameter = 12.0f;
-  const auto centre = bounds.getCentre();
+  const auto normalizedValue = 0.5f * (1.0f + value);
+
+  const auto indicatorX =
+      bounds.getX() + normalizedValue * (bounds.getWidth() - indicatorDiameter);
+
+  const auto indicatorY = bounds.getCentreY() - indicatorDiameter / 2.0f;
 
   graphics.setColour(juce::Colours::white);
-  graphics.fillEllipse(centre.x - indicatorDiameter / 2.0f,
-                       centre.y - indicatorDiameter / 2.0f, indicatorDiameter,
+  graphics.fillEllipse(indicatorX, indicatorY, indicatorDiameter,
                        indicatorDiameter);
 }
 
@@ -57,6 +66,21 @@ PluginEditor::PluginEditor(PluginProcessor& p)
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
   setSize(540, 270);
+  startTimerHz(30);
+}
+
+void PluginEditor::timerCallback() {
+  testLfoValue += 0.1f * testLfoDirection;
+
+  if (testLfoValue >= 1.0f) {
+    testLfoValue = 1.0f;
+    testLfoDirection = -1.0f;
+  } else if (testLfoValue <= -1.0f) {
+    testLfoValue = -1.0f;
+    testLfoDirection = 1.0f;
+  }
+
+  lfoIndicator.setValue(testLfoValue);
 }
 
 void PluginEditor::resized() {
