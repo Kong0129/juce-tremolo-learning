@@ -1,4 +1,20 @@
 namespace tremolo {
+
+void LfoIndicator::paint(juce::Graphics& graphics) {
+  const auto bounds = getLocalBounds().toFloat().reduced(4.0f);
+
+  graphics.setColour(juce::Colours::darkgrey);
+  graphics.fillEllipse(bounds);
+
+  constexpr auto indicatorDiameter = 12.0f;
+  const auto centre = bounds.getCentre();
+
+  graphics.setColour(juce::Colours::white);
+  graphics.fillEllipse(centre.x - indicatorDiameter / 2.0f,
+                       centre.y - indicatorDiameter / 2.0f, indicatorDiameter,
+                       indicatorDiameter);
+}
+
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p),
       waveformAttachment(p.getWaveformParameter(), waveformSelector, nullptr),
@@ -16,6 +32,7 @@ PluginEditor::PluginEditor(PluginProcessor& p)
 
   addAndMakeVisible(background);
   addAndMakeVisible(logo);
+  addAndMakeVisible(lfoIndicator);
   waveformSelector.addItem("Sine", 1);
   waveformSelector.addItem("Triangle", 2);
   waveformAttachment.sendInitialUpdate();
@@ -48,6 +65,8 @@ void PluginEditor::resized() {
   background.setBounds(bounds);
 
   logo.setBounds({16, 16, 105, 24});
+
+  lfoIndicator.setBounds(440, 120, 80, 80);
 
   waveformSelector.setBounds(16, 64, 160, 32);
 
