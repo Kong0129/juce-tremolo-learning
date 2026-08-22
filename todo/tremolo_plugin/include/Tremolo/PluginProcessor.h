@@ -11,6 +11,8 @@ public:
 
   juce::AudioParameterFloat& getDepthParameter() noexcept;
 
+  juce::AudioParameterBool& getBypassedParameter() noexcept;
+
   PluginProcessor();
 
   void prepareToPlay(double sampleRate, int expectedMaxFramesPerBlock) override;
