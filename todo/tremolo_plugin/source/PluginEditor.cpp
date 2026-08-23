@@ -26,6 +26,7 @@ void LfoIndicator::paint(juce::Graphics& graphics) {
 
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p),
+      processor(p),
       waveformAttachment(p.getWaveformParameter(), waveformSelector, nullptr),
       rateAttachment(p.getRateParameter(), rateSlider, nullptr),
       depthAttachment(p.getDepthParameter(), depthSlider, nullptr),
@@ -70,17 +71,7 @@ PluginEditor::PluginEditor(PluginProcessor& p)
 }
 
 void PluginEditor::timerCallback() {
-  testLfoValue += 0.1f * testLfoDirection;
-
-  if (testLfoValue >= 1.0f) {
-    testLfoValue = 1.0f;
-    testLfoDirection = -1.0f;
-  } else if (testLfoValue <= -1.0f) {
-    testLfoValue = -1.0f;
-    testLfoDirection = 1.0f;
-  }
-
-  lfoIndicator.setValue(testLfoValue);
+  lfoIndicator.setValue(processor.getCurrentLfoValue());
 }
 
 void PluginEditor::resized() {

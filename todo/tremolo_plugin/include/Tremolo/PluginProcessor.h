@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 
 namespace tremolo {
 class PluginProcessor : public juce::AudioProcessor {
@@ -14,6 +15,8 @@ public:
   juce::AudioParameterBool& getBypassedParameter() noexcept;
 
   PluginProcessor();
+
+  float getCurrentLfoValue() const noexcept { return latestLfoValue.load(); }
 
   void prepareToPlay(double sampleRate, int expectedMaxFramesPerBlock) override;
 
@@ -47,6 +50,7 @@ private:
   Parameters parameters{*this};
   Tremolo tremolo;
   BypassTransitionSmoother bypassTransitionSmoother;
+  std::atomic<float> latestLfoValue{0.0f};
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };

@@ -9,6 +9,8 @@ public:
     triangle = 1,
   };
 
+  float getCurrentLfoValue() const noexcept { return currentLfoValue; }
+
   Tremolo() {
     for (auto& oscillator : lfos) {
       oscillator.setFrequency(2.0f, true);
@@ -57,6 +59,7 @@ public:
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       const auto lfoIndex = juce::toUnderlyingType(currentLfo);
       const auto rawLfoValue = lfos[lfoIndex].processSample(0.0f);
+      currentLfoValue = rawLfoValue;
       const auto smoothedModulationDepth = modulationDepth.getNextValue();
 
       const auto modulationValue = 1.0f + smoothedModulationDepth * rawLfoValue;
@@ -81,9 +84,11 @@ public:
       oscillator.reset();
     }
     modulationDepth.setCurrentAndTargetValue(modulationDepth.getTargetValue());
+    currentLfoValue = 0.0f;
   }
 
 private:
+  float currentLfoValue = 0.0f;
   juce::LinearSmoothedValue<float> modulationDepth{0.4f};
 
   static float triangle(float phaseValue) noexcept {
