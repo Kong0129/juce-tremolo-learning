@@ -20,8 +20,8 @@ private:
   juce::ImageComponent background;
   juce::ImageComponent logo;
   LfoIndicator lfoIndicator;
-  float testLfoValue = -1.0f;
-  float testLfoDirection = 1.0f;
+
+  PluginProcessor& processor;
 
   juce::Label waveformLabel;
   juce::ComboBox waveformSelector;
