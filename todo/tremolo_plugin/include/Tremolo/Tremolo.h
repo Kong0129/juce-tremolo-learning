@@ -28,6 +28,7 @@ public:
       oscillator.prepare(processSpec);
     }
     modulationDepth.reset(sampleRate, 0.02);
+    waveformMix.reset(sampleRate, 0.01);
   }
 
   void setLfoWaveform(LfoWaveform newWaveform) noexcept {
@@ -57,8 +58,17 @@ public:
     updateLfoWaveform();
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
-      const auto lfoIndex = juce::toUnderlyingType(currentLfo);
-      const auto rawLfoValue = lfos[lfoIndex].processSample(0.0f);
+      const auto sineLfoValue =
+          lfos[juce::toUnderlyingType(LfoWaveform::sine)].processSample(0.0f);
+
+      const auto triangleLfoValue =
+          lfos[juce::toUnderlyingType(LfoWaveform::triangle)].processSample(
+              0.0f);
+
+      const auto currentWaveformMix = waveformMix.getNextValue();
+
+      const auto rawLfoValue = (1.0f - currentWaveformMix) * sineLfoValue +
+                               currentWaveformMix * triangleLfoValue;
       currentLfoValue = rawLfoValue;
       const auto smoothedModulationDepth = modulationDepth.getNextValue();
 
@@ -84,12 +94,16 @@ public:
       oscillator.reset();
     }
     modulationDepth.setCurrentAndTargetValue(modulationDepth.getTargetValue());
+    const auto currentMix = currentLfo == LfoWaveform::sine ? 0.0f : 1.0f;
+
+    waveformMix.setCurrentAndTargetValue(currentMix);
     currentLfoValue = 0.0f;
   }
 
 private:
   float currentLfoValue = 0.0f;
   juce::LinearSmoothedValue<float> modulationDepth{0.4f};
+  juce::LinearSmoothedValue<float> waveformMix{0.0f};
 
   static float triangle(float phaseValue) noexcept {
     const auto ft = phaseValue / juce::MathConstants<float>::twoPi;
@@ -108,6 +122,10 @@ private:
   void updateLfoWaveform() noexcept {
     if (currentLfo != lfoToSet) {
       currentLfo = lfoToSet;
+
+      const auto targetMix = currentLfo == LfoWaveform::sine ? 0.0f : 1.0f;
+
+      waveformMix.setTargetValue(targetMix);
     }
   }
 };

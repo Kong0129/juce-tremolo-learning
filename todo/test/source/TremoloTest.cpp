@@ -77,9 +77,14 @@ TEST(Tremolo, LfoWaveformTransitionIsSmooth) {
 
   testee.setLfoWaveform(Tremolo::LfoWaveform::sine);
   extractLfo(testee, processBuffer);
+  const auto lastSineValue = processBuffer.getSample(0, blockSizeSamples - 1);
   outputBuffer.copyFrom(0, 0, processBuffer, 0, 0, blockSizeSamples);
   testee.setLfoWaveform(Tremolo::LfoWaveform::triangle);
   extractLfo(testee, processBuffer);
+  const auto firstTriangleValue = processBuffer.getSample(0, 0);
+  const auto transitionJump = std::abs(firstTriangleValue - lastSineValue);
+
+  EXPECT_LT(transitionJump, 0.01f);
   outputBuffer.copyFrom(0, blockSizeSamples, processBuffer, 0, 0,
                         blockSizeSamples);
 
