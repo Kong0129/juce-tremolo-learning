@@ -1,10 +1,12 @@
 namespace tremolo {
 
 void LfoIndicator::setValue(float newValue) {
-  value = juce::jlimit(-1.0f, 1.0f, newValue);
+  const auto targetValue = juce::jlimit(-1.0f, 1.0f, newValue);
+  constexpr auto smoothingFactor = 0.5f;
+
+  value += smoothingFactor * (targetValue - value);
   repaint();
 }
-
 void LfoIndicator::paint(juce::Graphics& graphics) {
   const auto bounds = getLocalBounds().toFloat().reduced(4.0f);
 
@@ -67,7 +69,7 @@ PluginEditor::PluginEditor(PluginProcessor& p)
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
   setSize(540, 270);
-  startTimerHz(30);
+  startTimerHz(60);
 }
 
 void PluginEditor::timerCallback() {
