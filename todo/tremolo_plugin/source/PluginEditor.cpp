@@ -25,6 +25,46 @@ void LfoIndicator::paint(juce::Graphics& graphics) {
   graphics.fillEllipse(indicatorX, indicatorY, indicatorDiameter,
                        indicatorDiameter);
 }
+void LfoWaveformDisplay::pushValue(float newValue) {
+  for (std::size_t index = 1; index < history.size(); ++index) {
+    history[index - 1] = history[index];
+  }
+
+  history.back() = juce::jlimit(-1.0f, 1.0f, newValue);
+  repaint();
+}
+void LfoWaveformDisplay::paint(juce::Graphics& graphics) {
+  const auto bounds = getLocalBounds().toFloat().reduced(4.0f);
+
+  graphics.setColour(juce::Colours::darkgrey);
+  graphics.fillRoundedRectangle(bounds, 4.0f);
+
+  graphics.setColour(juce::Colours::grey);
+  graphics.drawLine(bounds.getX(), bounds.getCentreY(), bounds.getRight(),
+                    bounds.getCentreY(), 1.0f);
+
+  juce::Path waveformPath;
+
+  for (std::size_t index = 0; index < history.size(); ++index) {
+    const auto normalizedIndex =
+        static_cast<float>(index) /
+        static_cast<float>(history.size() - 1);
+
+    const auto x = bounds.getX() + normalizedIndex * bounds.getWidth();
+    const auto y =
+        bounds.getY() + 0.5f * (1.0f - history[index]) * bounds.getHeight();
+
+    if (index == 0) {
+      waveformPath.startNewSubPath(x, y);
+    } else {
+      waveformPath.lineTo(x, y);
+    }
+  }
+
+  graphics.setColour(juce::Colours::white);
+  graphics.strokePath(waveformPath,
+                      juce::PathStrokeType{2.0f});
+}
 
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p),
@@ -45,6 +85,7 @@ PluginEditor::PluginEditor(PluginProcessor& p)
   addAndMakeVisible(background);
   addAndMakeVisible(logo);
   addAndMakeVisible(lfoIndicator);
+  addAndMakeVisible(lfoWaveformDisplay);
   waveformSelector.addItem("Sine", 1);
   waveformSelector.addItem("Triangle", 2);
   waveformAttachment.sendInitialUpdate();
@@ -73,7 +114,10 @@ PluginEditor::PluginEditor(PluginProcessor& p)
 }
 
 void PluginEditor::timerCallback() {
-  lfoIndicator.setValue(processor.getCurrentLfoValue());
+  const auto currentLfoValue = processor.getCurrentLfoValue();
+
+  lfoIndicator.setValue(currentLfoValue);
+  lfoWaveformDisplay.pushValue(currentLfoValue);
 }
 
 void PluginEditor::resized() {
@@ -84,6 +128,8 @@ void PluginEditor::resized() {
   logo.setBounds({16, 16, 105, 24});
 
   lfoIndicator.setBounds(440, 120, 80, 80);
+
+  lfoWaveformDisplay.setBounds(16, 160, 400, 90);
 
   waveformSelector.setBounds(16, 64, 160, 32);
 
