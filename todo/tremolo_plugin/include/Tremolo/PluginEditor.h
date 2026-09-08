@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 
 namespace tremolo {
 class LfoIndicator : public juce::Component {
@@ -8,6 +9,16 @@ public:
 
 private:
   float value = 0.0f;
+};
+
+class LfoWaveformDisplay : public juce::Component {
+public:
+  void pushValue(float newValue);
+  void paint(juce::Graphics& graphics) override;
+
+private:
+  static constexpr std::size_t historySize = 120;
+  std::array<float, historySize> history{};
 };
 
 class PluginEditor : public juce::AudioProcessorEditor, private juce::Timer {
@@ -20,6 +31,7 @@ private:
   juce::ImageComponent background;
   juce::ImageComponent logo;
   LfoIndicator lfoIndicator;
+  LfoWaveformDisplay lfoWaveformDisplay;
 
   PluginProcessor& processor;
 
