@@ -27,6 +27,10 @@ public:
     for (auto& oscillator : lfos) {
       oscillator.prepare(processSpec);
     }
+    constexpr auto displaySampleRate = 1000.0;
+    lfoCaptureInterval =
+        juce::jmax(1, juce::roundToInt(sampleRate / displaySampleRate));
+    samplesUntilNextLfoCapture = 0;
     modulationDepth.reset(sampleRate, 0.02);
     waveformMix.reset(sampleRate, 0.01);
   }
@@ -54,7 +58,7 @@ public:
     }
   }
 
-  void process(juce::AudioBuffer<float>& buffer) noexcept {
+  void process(juce::AudioBuffer<float>& buffer, LfoValueFifo* lfoValueFifo = nullptr) noexcept {
     updateLfoWaveform();
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
@@ -70,6 +74,14 @@ public:
       const auto rawLfoValue = (1.0f - currentWaveformMix) * sineLfoValue +
                                currentWaveformMix * triangleLfoValue;
       currentLfoValue = rawLfoValue;
+      if (lfoValueFifo != nullptr) {
+        if (samplesUntilNextLfoCapture == 0) {
+          (void)lfoValueFifo->push(rawLfoValue);
+          samplesUntilNextLfoCapture = lfoCaptureInterval;
+        }
+
+        --samplesUntilNextLfoCapture;
+      }
       const auto smoothedModulationDepth = modulationDepth.getNextValue();
 
       const auto modulationValue = 1.0f + smoothedModulationDepth * rawLfoValue;
@@ -98,9 +110,12 @@ public:
 
     waveformMix.setCurrentAndTargetValue(currentMix);
     currentLfoValue = 0.0f;
+    samplesUntilNextLfoCapture = 0;
   }
 
 private:
+  int lfoCaptureInterval = 48;
+  int samplesUntilNextLfoCapture = 0;
   float currentLfoValue = 0.0f;
   juce::LinearSmoothedValue<float> modulationDepth{0.4f};
   juce::LinearSmoothedValue<float> waveformMix{0.0f};
