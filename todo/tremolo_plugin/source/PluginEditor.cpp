@@ -33,8 +33,7 @@ void LfoWaveformDisplay::pushValues(const float* newValues, int valueCount) {
 
   for (int index = 0; index < valueCount; ++index) {
     history[writeIndex] =
-        juce::jlimit(-1.0f, 1.0f,
-                     newValues[static_cast<std::size_t>(index)]);
+        juce::jlimit(-1.0f, 1.0f, newValues[static_cast<std::size_t>(index)]);
 
     writeIndex = (writeIndex + 1) % history.size();
   }
@@ -55,13 +54,12 @@ void LfoWaveformDisplay::paint(juce::Graphics& graphics) {
 
   for (std::size_t index = 0; index < history.size(); ++index) {
     const auto normalizedIndex =
-        static_cast<float>(index) /
-        static_cast<float>(history.size() - 1);
+        static_cast<float>(index) / static_cast<float>(history.size() - 1);
 
     const auto x = bounds.getX() + normalizedIndex * bounds.getWidth();
     const auto historyIndex = (writeIndex + index) % history.size();
-    const auto y =
-        bounds.getY() + 0.5f * (1.0f - history[historyIndex]) * bounds.getHeight();
+    const auto y = bounds.getY() +
+                   0.5f * (1.0f - history[historyIndex]) * bounds.getHeight();
 
     if (index == 0) {
       waveformPath.startNewSubPath(x, y);
@@ -71,8 +69,12 @@ void LfoWaveformDisplay::paint(juce::Graphics& graphics) {
   }
 
   graphics.setColour(juce::Colours::white);
-  graphics.strokePath(waveformPath,
-                      juce::PathStrokeType{2.0f});
+  graphics.strokePath(waveformPath, juce::PathStrokeType{2.0f});
+}
+void LfoWaveformDisplay::clear() {
+  history.fill(0.0f);
+  writeIndex = 0;
+  repaint();
 }
 
 PluginEditor::PluginEditor(PluginProcessor& p)
@@ -124,14 +126,25 @@ PluginEditor::PluginEditor(PluginProcessor& p)
 
 void PluginEditor::timerCallback() {
   const auto currentLfoValue = processor.getCurrentLfoValue();
+  const auto bypassed = processor.getBypassedParameter().get();
 
-  lfoIndicator.setValue(currentLfoValue);
   std::array<float, 128> fifoValues{};
   const auto valuesRead = processor.popLfoValues(
       fifoValues.data(), static_cast<int>(fifoValues.size()));
+  if (bypassed) {
+    lfoIndicator.setValue(0.0f);
 
+    if (!wasBypassed) {
+      lfoWaveformDisplay.clear();
+    }
+
+    wasBypassed = true;
+    return;
+  }
+
+  wasBypassed = false;
+  lfoIndicator.setValue(currentLfoValue);
   lfoWaveformDisplay.pushValues(fifoValues.data(), valuesRead);
-  
 }
 
 void PluginEditor::resized() {

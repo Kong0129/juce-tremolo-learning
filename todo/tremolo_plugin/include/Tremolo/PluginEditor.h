@@ -11,17 +11,16 @@ private:
 };
 
 class LfoWaveformDisplay : public juce::Component {
-  public:
+public:
   void pushValues(const float* newValues, int valueCount);
+  void clear();
   void paint(juce::Graphics& graphics) override;
-  private:
+
+private:
   static constexpr std::size_t historySize = 2000;
   std::array<float, historySize> history{};
   std::size_t writeIndex = 0;
-
 };
-
-
 
 class PluginEditor : public juce::AudioProcessorEditor, private juce::Timer {
 public:
@@ -36,6 +35,7 @@ private:
   LfoWaveformDisplay lfoWaveformDisplay;
 
   PluginProcessor& processor;
+  bool wasBypassed = false;
 
   juce::Label waveformLabel;
   juce::ComboBox waveformSelector;
