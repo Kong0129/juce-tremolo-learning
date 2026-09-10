@@ -3,15 +3,20 @@
 # Tremolo Audio Plugin
 
 [![License](https://img.shields.io/badge/license-Unlicense-blue.svg)](LICENSE.md)
-![Build Status](https://github.com/juce-framework/tremolo-juce-course/actions/workflows/cmake.yml/badge.svg)
+![Build Status](https://github.com/Kong0129/juce-tremolo-learning/actions/workflows/cmake.yml/badge.svg)
 ![CMake](https://img.shields.io/badge/CMake-3.25+-064F8C.svg?logo=cmake)
 ![C++](https://img.shields.io/badge/C++-23-00599C.svg?logo=cplusplus)
-![JUCE](https://img.shields.io/badge/JUCE-8.0.10-orange.svg)
+![JUCE](https://img.shields.io/badge/JUCE-8.0.12-orange.svg)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)
 
 <img alt="Tremolo user interface" src="docs/UI.png" width="512px">
 
-Tremolo audio plugin project used for the [Official JUCE Audio Plugin Development Course](https://www.wolfsoundacademy.com/juce) 🎓
+A JUCE-based tremolo audio effect developed as a hands-on audio plugin
+learning project. The project includes real-time DSP, parameter smoothing,
+state restoration, a custom GUI, LFO visualization, and automated tests.
+
+Based on the
+[Official JUCE Audio Plugin Development Course](https://www.wolfsoundacademy.com/juce).
 
 ![JUCE audio plugin development course logo](docs/JUCE_Course_logo.svg)
 
@@ -24,23 +29,24 @@ Tremolo audio plugin project used for the [Official JUCE Audio Plugin Developmen
   * VST3
   * Standalone
 * Tremolo audio effect: tremolo is amplitude modulation at a rate below the human hearing range. The result is a "pulsing" sound.
-* Parameters
-  * modulation rate
-  * LFO waveform
-  * bypass
-* Real-time LFO visualization
-* Custom UI
-* State serialization
-* Template *README.txt* for distribution
-* Configured GitHub Actions CI pipeline
-* Unit tests using [googletest](https://github.com/google/googletest)
-* CMake presets, including "release"
-* Automatic dependency downloading using [CPM](https://github.com/cpm-cmake/CPM.cmake)
-* Helper *.clang-format*, *.clang-tidy*, and *.pre-commit-config.yaml* configuration files
+* Tremolo parameters:
+  * Sine and triangle LFO waveforms
+  * Modulation rate from 0.1 Hz to 20 Hz
+  * Modulation depth from 0% to 100%
+  * Bypass control
+* Smooth modulation-depth changes
+* Smooth transitions between LFO waveforms
+* Smooth bypass transitions
+* Custom plugin editor with parameter attachments
+* Real-time LFO position indicator
+* Scrolling LFO waveform display
+* Lock-free FIFO communication between the audio and GUI threads
+* Plugin state serialization and restoration
+* Automated tests for DSP, state handling, smoothing, and FIFO boundaries
 
 ## 📋 Requirements
 
-You need to have the following software installed your machine:
+You need to have the following software installed on your machine:
 
 * Git version control system
 * CMake 3.25 or higher (the one bundled with CLion 2025.1.1 or higher should work)
@@ -51,37 +57,52 @@ You need to have the following software installed your machine:
 
 ## 🚀 Getting Started
 
-**Detailed instructions on the setup process [are described in the course.](https://www.wolfsoundacademy.com/juce)**
+Clone the repository:
 
-1. Click “Use this template” on GitHub to create your own copy and begin your project.
-2. Clone **your repository** locally.
-3. Build the *complete/* plugin
-   1. Open the *complete/* folder in CLion, or
-   2. In the main repo directory execute
+```bash
+git clone https://github.com/Kong0129/juce-tremolo-learning.git
+cd juce-tremolo-learning
+```
 
-      ```bash
-      cd complete
-      cmake --preset default
-      cmake --build --preset default
-      ```
+Configure the completed learning project with tests enabled:
 
-The first build will take the most time because the dependencies (CPM and JUCE) need to be downloaded.
+```bash
+cmake -S todo -B todo/cmake-build -DBUILD_TESTS=ON
+```
 
-Build artifacts will be located at *complete/cmake-build/TremoloCoursePlugin_artefacts/Debug*.
+Build and run the Debug tests:
+
+```bash
+cmake --build todo/cmake-build --config Debug --target TremoloCoursePluginTest
+ctest --test-dir todo/cmake-build -C Debug --output-on-failure
+```
+
+Build the Release VST3:
+
+```bash
+cmake --build todo/cmake-build --config Release --target TremoloCoursePlugin_VST3
+```
+
+On Windows, the VST3 is automatically copied to:
+
+```text
+%LOCALAPPDATA%\Programs\Common\VST3\KongTremolo.vst3
+```
+
+The first configuration and build may take longer because CMake downloads and builds the required dependencies.
 
 ## 📂 Structure
 
-This repository is a template. Click “Use this template” on GitHub to create your own copy and begin your project.
-
-The plugin project is present in two folders:
-
-* *complete/* contains the completed tremolo plugin project. It compiles and runs out of the box.
-* *todo/* contains skeleton code of the same plugin. This is the code you will work on throughout the course to gradually bring it to the same state as the *complete/* folder. In its default state, it does not compile.
+* `todo/` contains the implementation completed throughout this learning project.
+* `complete/` contains the reference implementation supplied by the original course.
+* `todo/tremolo_plugin/` contains the plugin DSP, parameters, state handling, and GUI.
+* `todo/test/` contains the automated GoogleTest test suite.
+* `docs/` contains images and documentation assets.
 
 ## 🤝 Contributing
 
-* If you find a bug, please, open an issue and/or provide a pull request.
-* Feature requests won't be merged because the goal of the repository is to be educational not feature-full.
+This repository documents my JUCE audio plugin development learning process.
+Bug reports and suggestions are welcome through GitHub issues.
 
 ## 📜 License
 
