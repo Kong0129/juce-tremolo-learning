@@ -25,12 +25,20 @@ void LfoIndicator::paint(juce::Graphics& graphics) {
   graphics.fillEllipse(indicatorX, indicatorY, indicatorDiameter,
                        indicatorDiameter);
 }
-void LfoWaveformDisplay::pushValue(float newValue) {
-  for (std::size_t index = 1; index < history.size(); ++index) {
-    history[index - 1] = history[index];
+
+void LfoWaveformDisplay::pushValues(const float* newValues, int valueCount) {
+  if (newValues == nullptr || valueCount <= 0) {
+    return;
   }
 
-  history.back() = juce::jlimit(-1.0f, 1.0f, newValue);
+  for (int index = 0; index < valueCount; ++index) {
+    history[writeIndex] =
+        juce::jlimit(-1.0f, 1.0f,
+                     newValues[static_cast<std::size_t>(index)]);
+
+    writeIndex = (writeIndex + 1) % history.size();
+  }
+
   repaint();
 }
 void LfoWaveformDisplay::paint(juce::Graphics& graphics) {
@@ -51,8 +59,9 @@ void LfoWaveformDisplay::paint(juce::Graphics& graphics) {
         static_cast<float>(history.size() - 1);
 
     const auto x = bounds.getX() + normalizedIndex * bounds.getWidth();
+    const auto historyIndex = (writeIndex + index) % history.size();
     const auto y =
-        bounds.getY() + 0.5f * (1.0f - history[index]) * bounds.getHeight();
+        bounds.getY() + 0.5f * (1.0f - history[historyIndex]) * bounds.getHeight();
 
     if (index == 0) {
       waveformPath.startNewSubPath(x, y);
@@ -121,10 +130,8 @@ void PluginEditor::timerCallback() {
   const auto valuesRead = processor.popLfoValues(
       fifoValues.data(), static_cast<int>(fifoValues.size()));
 
-  for (int index = 0; index < valuesRead; ++index) {
-    lfoWaveformDisplay.pushValue(
-        fifoValues[static_cast<std::size_t>(index)]);
-  }
+  lfoWaveformDisplay.pushValues(fifoValues.data(), valuesRead);
+  
 }
 
 void PluginEditor::resized() {

@@ -12,11 +12,12 @@ private:
 
 class LfoWaveformDisplay : public juce::Component {
   public:
-  void pushValue(float newValue);
+  void pushValues(const float* newValues, int valueCount);
   void paint(juce::Graphics& graphics) override;
   private:
   static constexpr std::size_t historySize = 2000;
   std::array<float, historySize> history{};
+  std::size_t writeIndex = 0;
 
 };
 
