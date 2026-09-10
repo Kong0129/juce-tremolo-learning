@@ -27,4 +27,26 @@ TEST(PluginProcessor, StateRoundTripRestoresParameters) {
 
   EXPECT_TRUE(restoredProcessor.getBypassedParameter().get());
 }
+
+TEST(PluginProcessor, InvalidStateLeavesParametersUnchanged) {
+  // Arrange
+  PluginProcessor processor{};
+
+  processor.getWaveformParameter() = 1;
+  processor.getRateParameter() = 7.25f;
+  processor.getDepthParameter() = 63.3f;
+  processor.getBypassedParameter() = true;
+
+  constexpr char invalidState[] = "this is not valid JSON";
+
+  // Act
+  processor.setStateInformation(invalidState,
+                                static_cast<int>(sizeof(invalidState) - 1));
+
+  // Assert
+  EXPECT_EQ(processor.getWaveformParameter().getIndex(), 1);
+  EXPECT_NEAR(processor.getRateParameter().get(), 7.25f, 1.0e-6f);
+  EXPECT_NEAR(processor.getDepthParameter().get(), 63.3f, 1.0e-6f);
+  EXPECT_TRUE(processor.getBypassedParameter().get());
+}
 }  // namespace tremolo
