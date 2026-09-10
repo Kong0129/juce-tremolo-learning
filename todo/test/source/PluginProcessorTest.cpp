@@ -17,8 +17,9 @@ TEST(PluginProcessor, StateRoundTripRestoresParameters) {
   ASSERT_GT(stateData.getSize(), 0u);
 
   PluginProcessor restoredProcessor{};
-  restoredProcessor.setStateInformation(stateData.getData(),
-                                        static_cast<int>(stateData.getSize()));  //Act
+  restoredProcessor.setStateInformation(
+      stateData.getData(),
+      static_cast<int>(stateData.getSize()));  // Act
 
   EXPECT_EQ(restoredProcessor.getWaveformParameter().getIndex(), 1);
 
@@ -46,6 +47,28 @@ TEST(PluginProcessor, InvalidStateLeavesParametersUnchanged) {
   // Assert
   EXPECT_EQ(processor.getWaveformParameter().getIndex(), 1);
   EXPECT_NEAR(processor.getRateParameter().get(), 7.25f, 1.0e-6f);
+  EXPECT_NEAR(processor.getDepthParameter().get(), 63.3f, 1.0e-6f);
+  EXPECT_TRUE(processor.getBypassedParameter().get());
+}
+
+TEST(PluginProcessor, PartialStateUpdatesOnlyPresentParameters) {
+  // Arrange
+  PluginProcessor processor{};
+
+  processor.getWaveformParameter() = 1;
+  processor.getRateParameter() = 7.25f;
+  processor.getDepthParameter() = 63.3f;
+  processor.getBypassedParameter() = true;
+
+  constexpr char partialState[] = R"({"rate": 5.5})";
+
+  // Act
+  processor.setStateInformation(partialState,
+                                static_cast<int>(sizeof(partialState) - 1));
+
+  // Assert
+  EXPECT_EQ(processor.getWaveformParameter().getIndex(), 1);
+  EXPECT_NEAR(processor.getRateParameter().get(), 5.5f, 1.0e-6f);
   EXPECT_NEAR(processor.getDepthParameter().get(), 63.3f, 1.0e-6f);
   EXPECT_TRUE(processor.getBypassedParameter().get());
 }
