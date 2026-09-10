@@ -14,9 +14,11 @@ juce::AudioParameterChoice& createWaveformParameter(
 }
 juce::AudioParameterFloat& createRateParameter(
     juce::AudioProcessor& processor) {
+  const auto attributes = juce::AudioParameterFloatAttributes{}.withLabel("Hz");
   auto parameter = std::make_unique<juce::AudioParameterFloat>(
       juce::ParameterID{"modulation.rate", 1}, "Rate",
-      juce::NormalisableRange<float>{0.1f, 20.0f, 0.01f, 0.4f}, 2.0f, "Hz");
+      juce::NormalisableRange<float>{0.1f, 20.0f, 0.01f, 0.4f}, 2.0f,
+      attributes);
 
   auto& parameterReference = *parameter;
   processor.addParameter(parameter.release());
@@ -25,9 +27,10 @@ juce::AudioParameterFloat& createRateParameter(
 }
 juce::AudioParameterFloat& createDepthParameter(
     juce::AudioProcessor& processor) {
+  const auto attributes = juce::AudioParameterFloatAttributes{}.withLabel("%");
   auto parameter = std::make_unique<juce::AudioParameterFloat>(
       juce::ParameterID{"modulation.depth", 1}, "Depth",
-      juce::NormalisableRange<float>{0.0f, 100.0f, 0.1f}, 40.0f, "%");
+      juce::NormalisableRange<float>{0.0f, 100.0f, 0.1f}, 40.0f, attributes);
 
   auto& parameterReference = *parameter;
   processor.addParameter(parameter.release());
