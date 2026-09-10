@@ -18,6 +18,10 @@ public:
 
   float getCurrentLfoValue() const noexcept { return latestLfoValue.load(); }
 
+  int popLfoValues(float* destination, int maximumValues) noexcept {
+    return lfoValueFifo.pop(destination, maximumValues);
+  }
+
   void prepareToPlay(double sampleRate, int expectedMaxFramesPerBlock) override;
 
   void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
@@ -49,6 +53,7 @@ public:
 private:
   Parameters parameters{*this};
   Tremolo tremolo;
+  LfoValueFifo lfoValueFifo;
   BypassTransitionSmoother bypassTransitionSmoother;
   std::atomic<float> latestLfoValue{0.0f};
 

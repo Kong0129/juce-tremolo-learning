@@ -117,7 +117,14 @@ void PluginEditor::timerCallback() {
   const auto currentLfoValue = processor.getCurrentLfoValue();
 
   lfoIndicator.setValue(currentLfoValue);
-  lfoWaveformDisplay.pushValue(currentLfoValue);
+  std::array<float, 128> fifoValues{};
+  const auto valuesRead = processor.popLfoValues(
+      fifoValues.data(), static_cast<int>(fifoValues.size()));
+
+  for (int index = 0; index < valuesRead; ++index) {
+    lfoWaveformDisplay.pushValue(
+        fifoValues[static_cast<std::size_t>(index)]);
+  }
 }
 
 void PluginEditor::resized() {

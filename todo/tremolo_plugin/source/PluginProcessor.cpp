@@ -124,14 +124,14 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
   if (bypassTransitionSmoother.isTransitioning()) {
     bypassTransitionSmoother.setDryBuffer(buffer);
-    tremolo.process(buffer);
+    tremolo.process(buffer, &lfoValueFifo);
     latestLfoValue.store(tremolo.getCurrentLfoValue());
     bypassTransitionSmoother.mixToWetBuffer(buffer);
     return;
   }
 
   if (!bypassed) {
-    tremolo.process(buffer);
+    tremolo.process(buffer, &lfoValueFifo);
     latestLfoValue.store(tremolo.getCurrentLfoValue());
   }
 }
